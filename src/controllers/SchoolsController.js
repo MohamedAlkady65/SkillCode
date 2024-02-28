@@ -1,54 +1,20 @@
-const fs = require("fs");
-const multer = require("multer");
 const catchAsync = require("../utils/catchAsync.js");
 const SchoolsServices = require("../services/SchoolsServices.js");
 const schoolValidation = require("../validations/schoolValidation.js");
 const AppError = require("../utils/appError.js");
-const sharpHandler = require("../utils/sharpHandler.js");
+const uploadMulter = require("../utils/uploadMulter.js");
+const SchoolsModel = require("../models/SchoolsModel.js");
 
-const upload = multer({
-	storage: multer.memoryStorage(),
-	fileFilter: (req, file, cb) => {
-		if (file.mimetype.startsWith("image")) {
-			cb(null, true);
-		} else {
-			cb(new AppError("Logo must be an image", 400), false);
-		}
-	},
-	limits: {
-		fileSize: 10 ** 6,
-	},
+const upload = uploadMulter({
+	typeError: new AppError("Logo must be an image", 400),
 });
 
 exports.uploadLogo = upload.single("logo");
 
-const saveLogo = async (file) => {
-	if (file) {
-		const name = `school-${Math.floor(
-			Math.random() * 1000 * Date.now()
-		)}.jpeg`;
-
-		await sharpHandler({
-			file: file,
-			path: `public/images/schools/${name}`,
-		});
-		return name;
-	}
-};
-
 exports.addSchool = catchAsync(async (req, res, next) => {
 	const school = await schoolValidation.validate(req.body);
 
-	school.logo = await saveLogo(req.file);
-
-	try {
-		await SchoolsServices.addSchool(school);
-	} catch (error) {
-		if (school.logo) {
-			fs.unlink(`public/images/schools/${school.logo}`, (_) => {});
-		}
-		throw error;
-	}
+	await SchoolsServices.addSchool(school, req.file);
 
 	res.status(201).json({
 		status: "success",
@@ -106,21 +72,8 @@ exports.deleteSchoolById = catchAsync(async (req, res, next) => {
 exports.editSchoolById = catchAsync(async (req, res, next) => {
 	const id = getSchoolId();
 	const school = await schoolValidation.validate(req.body, true);
-	const logo = await saveLogo(req.file);
-
-	if (logo) {
-		school.logo = logo;
-	}
-
-	try {
-		if (Object.keys(school).length !== 0) {
-			await SchoolsServices.editSchoolById(school, id);
-		}
-	} catch (error) {
-		if (school.logo) {
-			fs.unlink(`public/images/schools/${school.logo}`, (_) => {});
-		}
-		throw error;
+	if (Object.keys(school).length !== 0 || req.file) {
+		await SchoolsServices.editSchoolById(school, id, req.file);
 	}
 
 	res.status(200).json({
@@ -139,4 +92,12 @@ exports.editSchoolById = catchAsync(async (req, res, next) => {
 		}
 		return id;
 	}
+});
+
+exports.getListOfSchools = catchAsync(async (req, res, next) => {
+	const schools = await SchoolsModel.getListOfSchools();
+	res.status(200).json({
+		status: "success",
+		data: schools,
+	});
 });

@@ -52,3 +52,11 @@ exports.deleteCourseById = catchAsync(async (req, res, next) => {
 		data: null,
 	});
 });
+
+exports.getListOfCourses = catchAsync(async (req, res, next) => {
+	const courses = await CoursesServices.getListOfCourses();
+	res.status(200).json({
+		status: "success",
+		data: courses,
+	});
+});

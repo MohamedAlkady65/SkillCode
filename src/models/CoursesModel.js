@@ -5,11 +5,16 @@ class CoursesModel {
 		const [courses] = await db.query(sql);
 		return courses;
 	}
-	static getNumberOfCourses = async () => {
-		const sql = `SELECT COUNT(id) as count FROM courses WHERE active=true`;
+	static getNumberOfCourses = async (queryString) => {
+		const sql = `SELECT COUNT(id) as count FROM courses WHERE active=true ${queryString}`;
 		const [result] = await db.query(sql);
 		return result;
 	};
+	static async getListOfCourses() {
+		const sql = `SELECT id , title FROM courses WHERE active=true ORDER BY title`;
+		const [courses] = await db.query(sql);
+		return courses;
+	}
 	static async getCourseById(id) {
 		const sql = `SELECT title, description  FROM courses WHERE id = ? AND active=true `;
 		const values = [id];
@@ -50,6 +55,14 @@ class CoursesModel {
 		const [result] = await db.query(sql, values);
 		return result;
 	};
+
+	static async getCourseAttributeByClassId(classId) {
+		const sql = `SELECT id , attribute FROM course_report_attributes 
+		WHERE course_id = (SELECT  course_id FROM classes WHERE id = ?) AND active=true `;
+		const values = [classId];
+		const [attributes] = await db.query(sql, values);
+		return attributes;
+	}
 	static checkExists = async (id) => {
 		const sql = `SELECT COUNT(id) as count FROM courses WHERE id = ? AND active = true`;
 		const values = [id];

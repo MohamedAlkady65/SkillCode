@@ -16,6 +16,13 @@ router
 		CoursesController.addCourse
 	);
 
+router.get(
+	"/list",
+	AuthController.protectRoute,
+	AuthController.restrictTo(1, 2),
+	CoursesController.getListOfCourses
+);
+
 router
 	.route("/:id")
 	.get(

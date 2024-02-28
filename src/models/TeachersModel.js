@@ -30,11 +30,24 @@ class TeachersModel {
 
 		return teachers;
 	}
+	static async getListOfTeachers(schoolId) {
+		const sql = `SELECT t.id, t.name
+        FROM teachers t 
+        INNER JOIN users u on t.user_id = u.id 
+        LEFT OUTER JOIN schools s on t.school = s.id
+		WHERE t.school = ?
+        ORDER BY t.name`;
+		const values = [schoolId];
+		const [teachers] = await db.query(sql, values);
 
-	static getNumberOfTeachers = async () => {
+		return teachers;
+	}
+
+	static getNumberOfTeachers = async (queryString) => {
 		const sql = `SELECT COUNT(t.id) as count FROM teachers t 
         INNER JOIN users u on t.user_id = u.id 
         LEFT OUTER JOIN schools s on t.school = s.id 
+		WHERE 1=1 ${queryString}
         `;
 
 		const [result] = await db.query(sql);
@@ -79,11 +92,11 @@ class TeachersModel {
 		return result.insertId;
 	}
 
-	static editTeacherById = async (teacher, id) => {
+	static editTeacherById = async (transactionConnection, teacher, id) => {
 		const sql = `UPDATE users u INNER JOIN teachers t on u.id = t.user_id 
 			SET ? WHERE  t.id = ?`;
 		const values = [teacher, id];
-		const [result] = await db.query(sql, values);
+		const [result] = await transactionConnection.query(sql, values);
 
 		return result;
 	};

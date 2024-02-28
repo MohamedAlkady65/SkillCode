@@ -34,6 +34,11 @@ exports.sessionExists = async (value, helper) => {
 	if (!(await SessionsServices.checkExists(value)))
 		return helper.message("Session is not found");
 };
+exports.studentExists = async (value, helper) => {
+	if (!value) return;
+	if (!(await StudentsServices.checkExists(value)))
+		return helper.message("Student is not found");
+};
 
 exports.studentNationalIdExists = async (value, helper) => {
 	if (!value) return;

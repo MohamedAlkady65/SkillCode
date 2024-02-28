@@ -2,39 +2,19 @@ const ClassesModel = require("../models/ClassesModel");
 const ApiFeatures = require("../utils/ApiFeatures");
 const AppError = require("../utils/appError");
 
-const handleClass = (class_) => {
-	class_.school = {
-		id: class_.school_id,
-		name: class_.school_name,
-	};
-	delete class_.school_id;
-	delete class_.school_name;
-
-	class_.course = {
-		id: class_.course_id,
-		name: class_.course_title,
-	};
-	delete class_.course_id;
-	delete class_.course_title;
-
-	class_.teacher = {
-		id: class_.teacher_id,
-		name: class_.teacher_name,
-	};
-	delete class_.teacher_id;
-	delete class_.teacher_name;
-};
-
 class ClassesServices {
 	static async getAll(query) {
 		const features = new ApiFeatures(query);
-		const queryString = features.filter(["school_id"]).pagination().query();
+		const [queryString, queryStringForCount] = features
+			.filter(["school_id"])
+			.pagination()
+			.query();
 		const classes = await ClassesModel.getAll(queryString);
 		classes.forEach(handleClass);
 
 		if (!features.page) return { classes };
 
-		const result = await ClassesModel.getNumber();
+		const result = await ClassesModel.getNumber(queryStringForCount);
 		const pagesCount = Math.ceil(result[0].count / features.limit);
 
 		return { pagesCount, classes };
@@ -75,7 +55,9 @@ class ClassesServices {
 
 	static async getEnrolledStudents(classId, query) {
 		const features = new ApiFeatures(query);
-		const queryString = features.pagination().query();
+		const [queryString, queryStringForCount] = features
+			.pagination()
+			.query();
 
 		const students = await ClassesModel.getEnrolledStudents(
 			classId,
@@ -84,7 +66,10 @@ class ClassesServices {
 
 		if (!features.page) return { students };
 
-		const result = await ClassesModel.getEnrolledStudentsNumber();
+		const result = await ClassesModel.getEnrolledStudentsNumber(
+			classId,
+			queryStringForCount
+		);
 		const pagesCount = Math.ceil(result[0].count / features.limit);
 
 		return { pagesCount, students };
@@ -113,6 +98,35 @@ class ClassesServices {
 			throw new AppError("Forbidden, You have not permission", 403);
 		}
 	};
+	static checkStudentEnrolledInClass = async ({ studentId, classId }) => {
+		const result = await ClassesModel.checkStudentEnrolledInClass({
+			classId: classId,
+			studentId: studentId,
+		});
+		return result[0].count > 0;
+	};
 }
 
+const handleClass = (class_) => {
+	class_.school = {
+		id: class_.school_id,
+		name: class_.school_name,
+	};
+	delete class_.school_id;
+	delete class_.school_name;
+
+	class_.course = {
+		id: class_.course_id,
+		name: class_.course_title,
+	};
+	delete class_.course_id;
+	delete class_.course_title;
+
+	class_.teacher = {
+		id: class_.teacher_id,
+		name: class_.teacher_name,
+	};
+	delete class_.teacher_id;
+	delete class_.teacher_name;
+};
 module.exports = ClassesServices;

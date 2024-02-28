@@ -6,7 +6,10 @@ exports.validate = async (data, edit = false) => {
 	const schemaObject = {
 		title: Joi.string().required().min(2).max(100),
 		description: Joi.string().max(1000),
-		attributes: Joi.array().min(1).required().items(Joi.string()),
+		attributes: Joi.array()
+			.min(1)
+			.required()
+			.items(Joi.string().min(2).max(20)),
 	};
 
 	if (edit) {

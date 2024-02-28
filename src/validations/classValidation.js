@@ -4,9 +4,13 @@ const generateEditSchema = require("./utils/generateEditSchema.js");
 const TeachersServices = require("../services/TeachersServices.js");
 const AppError = require("../utils/appError.js");
 const ClassesServices = require("../services/ClassesServices.js");
-const { schoolExists, courseExists, teachersExists } = require("./utils/checkExists.js");
+const {
+	schoolExists,
+	courseExists,
+	teachersExists,
+} = require("./utils/checkExists.js");
 
-validate = async (data, edit = false) => {
+const validate = async (data, edit = false) => {
 	const schemaObject = {
 		school_id: Joi.number().required().external(schoolExists),
 		course_id: Joi.number().required().external(courseExists),
@@ -79,4 +83,3 @@ exports.validateEnrollStudents = async (data) => {
 
 	return await schema.validateAsync(data, validationOptions);
 };
-

@@ -18,13 +18,15 @@ class ClassesModel {
 
 		return classes;
 	}
-	static async getNumber() {
+	static async getNumber(queryString) {
 		const sql = `
         SELECT 
         COUNT(cl.id) as count
         FROM classes cl INNER JOIN schools s on school_id = s.id
         INNER JOIN courses co on course_id = co.id 
-        INNER JOIN teachers t on teacher_id = t.id`;
+        INNER JOIN teachers t on teacher_id = t.id
+		WHERE 1=1 ${queryString}
+		`;
 
 		const [result] = await db.query(sql);
 
@@ -94,9 +96,9 @@ class ClassesModel {
 		const [students] = await db.query(sql, values);
 		return students;
 	}
-	static async getEnrolledStudentsNumber(classId) {
+	static async getEnrolledStudentsNumber(classId, queryString) {
 		const sql = `SELECT COUNT(s.id) as count FROM class_enrollment c 
-		INNER JOIN students s on student_id = s.id WHERE c.class_id = ?`;
+		INNER JOIN students s on student_id = s.id WHERE c.class_id = ? ${queryString}`;
 		const values = [classId];
 		const [result] = await db.query(sql, values);
 		return result;
@@ -114,6 +116,13 @@ class ClassesModel {
 
 		const [result] = await db.query(sql, values);
 
+		return result;
+	}
+	static async checkStudentEnrolledInClass({ studentId, classId }) {
+		const sql =
+			"SELECT COUNT(student_id) FROM class_enrollment WHERE student_id = ? AND class_id = ?  ";
+		const values = [studentId, classId];
+		const [result] = await db.query(sql, values);
 		return result;
 	}
 }

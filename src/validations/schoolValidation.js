@@ -35,6 +35,7 @@ exports.validate = async (data, edit = false) => {
 			"facebook",
 			"instagram",
 			"about",
+			"site",
 		];
 		if ("logo" in data) {
 			data.logo = data.logo == "null" ? null : data.logo;

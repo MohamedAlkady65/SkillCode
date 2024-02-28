@@ -12,6 +12,7 @@ router
 	.post(
 		AuthController.protectRoute,
 		AuthController.restrictTo(1, 2, 3),
+		TasksController.uploadImages,
 		TasksController.add
 	)
 	.delete(

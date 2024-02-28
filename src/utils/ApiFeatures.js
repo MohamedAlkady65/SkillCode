@@ -1,8 +1,17 @@
 const { escape, escapeId } = require("mysql2");
 
 class ApiFeatures {
-	constructor(options) {
+	constructor(options, replaceKeysObject) {
 		this.options = options || {};
+		this.replaceKeysObject = replaceKeysObject || {};
+	}
+
+	replaceKey(key) {
+		const prefix = this.replaceKeysObject[key];
+		if (prefix) {
+			return `${prefix}.${key}`;
+		}
+		return key;
 	}
 
 	query() {
@@ -22,12 +31,12 @@ class ApiFeatures {
 			query += `AND ${filterList.join(" AND ")}`;
 		}
 
+		const queryForCount = query;
+
 		query += this.sortQuery || "";
 		query += this.paginationQuery || "";
 
-		console.log(query);
-
-		return query;
+		return [query, queryForCount];
 	}
 
 	filter(filterFields) {
@@ -37,7 +46,9 @@ class ApiFeatures {
 
 		const filterList = Object.keys(filterOptions).map((key) => {
 			if (filterFields.includes(key)) {
-				return `${key} = ${escape(filterOptions[key])}`;
+				return `${this.replaceKey(key)} = ${escape(
+					filterOptions[key]
+				)}`;
 			}
 		});
 
@@ -52,7 +63,9 @@ class ApiFeatures {
 		if (!this.options.search) return this;
 
 		const searchQueryList = searchFields.map((el) => {
-			return `${el} LIKE ${escape(`%${this.options.search}%`)}`;
+			return `${this.replaceKey(el)} LIKE ${escape(
+				`%${this.options.search}%`
+			)}`;
 		});
 
 		if (searchQueryList.length !== 0) {
@@ -70,7 +83,7 @@ class ApiFeatures {
 			sort = sortFields[0];
 		}
 
-		this.sortQuery = ` ORDER BY ${escapeId(sort)} `;
+		this.sortQuery = ` ORDER BY ${escapeId(this.replaceKey(sort))} `;
 
 		return this;
 	}

@@ -16,6 +16,13 @@ router
 		TeachersController.addTeacher
 	);
 
+router.get(
+	"/list/schooId",
+	AuthController.protectRoute,
+	AuthController.restrictTo(1, 2),
+	TeachersController.getListOfTeachers
+);
+
 router
 	.route("/:id")
 	.get(
@@ -23,13 +30,13 @@ router
 		AuthController.restrictTo(1, 2),
 		TeachersController.checkTeacherInSchool,
 		TeachersController.getTeacherById
-	)
-	// .delete(
-	// 	AuthController.protectRoute,
-	// 	AuthController.restrictTo(1, 2),
-	// 	TeachersController.checkTeacherInSchool,
-	// 	TeachersController.deleteTeacherById
-	// );
+	);
+// .delete(
+// 	AuthController.protectRoute,
+// 	AuthController.restrictTo(1, 2),
+// 	TeachersController.checkTeacherInSchool,
+// 	TeachersController.deleteTeacherById
+// );
 
 router.patch(
 	"/:id?",
@@ -39,5 +46,10 @@ router.patch(
 	TeachersController.uploadPhoto,
 	TeachersController.editTeacherById
 );
-
+router.get(
+	"/list/:schooId",
+	AuthController.protectRoute,
+	AuthController.restrictTo(1, 2),
+	TeachersController.getListOfTeachers
+);
 module.exports = router;

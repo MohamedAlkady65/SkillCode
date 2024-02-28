@@ -12,6 +12,7 @@ const StudentsRouter = require("./routes/StudentsRouter.js");
 const ClassesRouter = require("./routes/ClassesRouter.js");
 const ClassStudentCommentsRouter = require("./routes/ClassStudentCommentsRouter.js");
 const SessionsRouter = require("./routes/SessionsRouter.js");
+const ReportsRouter = require("./routes/ReportsRouter.js");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/students", StudentsRouter);
 app.use("/classes", ClassesRouter);
 app.use("/classStudentComments", ClassStudentCommentsRouter);
 app.use("/sessions", SessionsRouter);
+app.use("/reports", ReportsRouter);
 
 app.all("*", (req, res, next) => {
 	next(

@@ -8,8 +8,18 @@ class SchoolsModel {
 		const [schools] = await db.query(sql);
 		return schools;
 	};
-	static getNumberOfSchools = async () => {
-		const sql = `SELECT COUNT(s.id) as count FROM schools s INNER JOIN users u on s.user_id = u.id `;
+	static getListOfSchools = async () => {
+		const sql = `SELECT  s.id , name
+			FROM schools s INNER JOIN users u on s.user_id = u.id ORDER BY name`;
+		const [schools] = await db.query(sql);
+		return schools;
+	};
+	static getNumberOfSchools = async (queryString) => {
+		const sql = `SELECT COUNT(s.id) as count FROM schools s 
+		INNER JOIN users u on s.user_id = u.id
+		WHERE 1=1 ${queryString} `;
+
+		console.log(sql);
 		const [result] = await db.query(sql);
 		return result;
 	};
@@ -55,11 +65,11 @@ class SchoolsModel {
 
 		return result;
 	};
-	static editSchoolById = async (school, id) => {
+	static editSchoolById = async (transactionConnection, school, id) => {
 		const sql = `UPDATE users u INNER JOIN schools s on u.id = s.user_id 
 			SET ? WHERE  s.id = ?`;
 		const values = [school, id];
-		const [result] = await db.query(sql, values);
+		const [result] = await transactionConnection.query(sql, values);
 
 		return result;
 	};

@@ -32,11 +32,11 @@ class StudentsModel {
 		return students;
 	}
 
-	static getNumberOfStudents = async () => {
+	static getNumberOfStudents = async (queryString) => {
 		const sql = `SELECT COUNT(s.id) as count
         FROM students s 
         INNER JOIN schools sc on s.school = sc.id 
-        WHERE s.active = true`;
+        WHERE s.active = true ${queryString}`;
 
 		const [result] = await db.query(sql);
 		return result;
@@ -75,7 +75,7 @@ class StudentsModel {
 		return students;
 	}
 
-	static async addStudent(student) {
+	static async addStudent(transactionConnection, student) {
 		const sql = `INSERT INTO students ( name, national_id, birth_day, gender, photo, parent_phone,school) 
         VALUES (?,?,?,?,?,?,?)`;
 
@@ -89,14 +89,14 @@ class StudentsModel {
 			student.school,
 		];
 
-		const [result] = await db.query(sql, valuse);
+		const [result] = await transactionConnection.query(sql, valuse);
 		return result.insertId;
 	}
 
-	static editStudentById = async (student, id) => {
+	static editStudentById = async (transactionConnection, student, id) => {
 		const sql = `UPDATE students SET ? WHERE active=true AND id = ?`;
 		const values = [student, id];
-		const [result] = await db.query(sql, values);
+		const [result] = await transactionConnection.query(sql, values);
 
 		return result;
 	};
