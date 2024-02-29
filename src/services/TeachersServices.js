@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 const TeachersModel = require("../models/TeachersModel");
 const ApiFeatures = require("../utils/ApiFeatures");
 const AppError = require("../utils/appError");

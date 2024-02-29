@@ -5,7 +5,7 @@ const { sessionExists } = require("./utils/checkExists.js");
 exports.validate = async (data) => {
 	const schemaObject = {
 		sessionId: Joi.number().required().external(sessionExists),
-		description: Joi.string().max(2000),
+		description: Joi.string().required().min(5).max(2000),
 	};
 
 	const schema = Joi.object(schemaObject);

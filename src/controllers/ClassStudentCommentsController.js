@@ -1,9 +1,14 @@
 const ClassStudentCommentsServices = require("../services/ClassStudentCommentsServices");
+const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const classStudentCommentsValidate = require("../validations/classStudentCommentsValidate");
 
 exports.get = catchAsync(async (req, res, next) => {
 	const { classId, studentId } = req.params;
+
+	if (!classId || !studentId) {
+		return next();
+	}
 
 	const comments = await ClassStudentCommentsServices.get({
 		classId,
@@ -17,7 +22,9 @@ exports.get = catchAsync(async (req, res, next) => {
 });
 exports.add = catchAsync(async (req, res, next) => {
 	const { classId, studentId } = req.params;
-
+	if (!classId || !studentId) {
+		return next();
+	}
 	req.body.classId = classId;
 	req.body.studentId = studentId;
 
@@ -42,4 +49,22 @@ exports.delete = catchAsync(async (req, res, next) => {
 		status: "success",
 		data: null,
 	});
+});
+
+exports.authorizeComment = catchAsync(async (req, res, next) => {
+	const commentId = req.params.id;
+	if (req.user.isAdmin) {
+		await ClassStudentCommentsServices.authorizeComment({ commentId });
+	} else if (req.user.isSchool) {
+		await ClassStudentCommentsServices.authorizeComment({
+			commentId,
+			schoolId: req.user.school_id,
+		});
+	} else if (req.user.isTeacher) {
+		await ClassStudentCommentsServices.authorizeComment({
+			commentId,
+			teacherId: req.user.teacher_id,
+		});
+	}
+	next();
 });

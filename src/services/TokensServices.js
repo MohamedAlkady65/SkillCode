@@ -7,6 +7,7 @@ const {
 	decodeToken,
 } = require("../utils/encrypt.js");
 const AppError = require("../utils/appError.js");
+const cashingTokens = require("../utils/cashingTokens.js");
 
 class TokensServices {
 	constructor() {}
@@ -25,26 +26,7 @@ class TokensServices {
 		try {
 			const payload = await verifyToken(token);
 			const userId = payload.id;
-			const hashedToken = await hashSHA256(token);
-
-			const results = await TokensModel.verifyLoginToken({
-				hashedToken: hashedToken,
-				userId: userId,
-			});
-
-			if (results.length == 0) {
-				throw new AppError("Invalid Token", 401);
-			}
-
-			const user = results[0];
-
-			user.isAdmin = user.role == 1;
-			user.isSchool = user.role == 2;
-			user.isTeacher = user.role == 3;
-
-			await getResourceId(user);
-			delete user.token;
-
+			let user = await getUser(token, userId);
 			return user;
 		} catch (error) {
 			if (
@@ -63,6 +45,7 @@ class TokensServices {
 	}
 
 	static async logout(token) {
+		cashingTokens.delete(token);
 		const hashedToken = await hashSHA256(token);
 		await TokensModel.removeLoginToken(hashedToken);
 	}
@@ -139,3 +122,32 @@ const getResourceId = async (user) => {
 };
 
 module.exports = TokensServices;
+async function getUser(token, userId) {
+	let user;
+
+	const cashedUser = cashingTokens.get(token);
+	if (cashedUser) {
+		user = cashedUser;
+	} else {
+		const hashedToken = await hashSHA256(token);
+		const results = await TokensModel.verifyLoginToken({
+			hashedToken: hashedToken,
+			userId: userId,
+		});
+
+		if (results.length == 0) {
+			throw new AppError("Invalid Token", 401);
+		}
+
+		user = results[0];
+		user.isAdmin = user.role == 1;
+		user.isSchool = user.role == 2;
+		user.isTeacher = user.role == 3;
+
+		await getResourceId(user);
+		delete user.token;
+
+		cashingTokens.set(token, user);
+	}
+	return user;
+}

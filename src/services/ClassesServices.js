@@ -79,7 +79,7 @@ class ClassesServices {
 		return result[0].count > 0;
 	};
 	static getSchoolOfClass = async (classId) => {
-		const result = await ClassesModel.getSchoolOfClass(classId);
+		const result = await ClassesModel.getSchoolAndTeacherOfClass(classId);
 
 		if (result.length == 0) {
 			throw new AppError("Class not found", 404);
@@ -87,14 +87,18 @@ class ClassesServices {
 
 		return result[0].school_id;
 	};
-	static checkClassInSchool = async ({ schoolId, classId }) => {
-		const result = await ClassesModel.getSchoolOfClass(classId);
+
+	static authorizeClass = async ({ schoolId, teacherId, classId }) => {
+		const result = await ClassesModel.getSchoolAndTeacherOfClass(classId);
 
 		if (result.length == 0) {
 			throw new AppError("Class not found", 404);
 		}
 
-		if (result[0].school_id != schoolId) {
+		if (teacherId && result[0].teacher_id != teacherId) {
+			throw new AppError("Forbidden, You have not permission", 403);
+		}
+		if (schoolId && result[0].school_id != schoolId) {
 			throw new AppError("Forbidden, You have not permission", 403);
 		}
 	};

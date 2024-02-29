@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 
 class ClassesModel {
 	static async getAll(queryString) {
@@ -110,8 +110,8 @@ class ClassesModel {
 		return result;
 	};
 
-	static async getSchoolOfClass(classId) {
-		const sql = "SELECT school_id FROM classes WHERE id = ?";
+	static async getSchoolAndTeacherOfClass(classId) {
+		const sql = "SELECT school_id , teacher_id FROM classes WHERE id = ?";
 		const values = [classId];
 
 		const [result] = await db.query(sql, values);

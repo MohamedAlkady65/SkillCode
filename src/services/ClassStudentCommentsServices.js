@@ -42,6 +42,22 @@ class ClassStudentCommentsServices {
 			throw new AppError("Student is not enrolled in this class", 400);
 		}
 	}
+	static async authorizeComment({ commentId, teacherId, schoolId }) {
+		const result = await ClassStudentCommentsModel.getSchoolAndTeacher(
+			commentId
+		);
+		if (result.length == 0) {
+			throw new AppError("Comment not found", 404);
+		}
+
+		if (teacherId && result[0].teacher_id != teacherId) {
+			throw new AppError("Forbidden, You have not permission", 403);
+		}
+
+		if (schoolId && result[0].school_id != schoolId) {
+			throw new AppError("Forbidden, You have not permission", 403);
+		}
+	}
 }
 
 module.exports = ClassStudentCommentsServices;

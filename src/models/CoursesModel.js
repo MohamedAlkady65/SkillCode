@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 class CoursesModel {
 	static async getAllCourses(queryString) {
 		const sql = `SELECT id , title ,description  FROM courses WHERE active=true ${queryString}`;

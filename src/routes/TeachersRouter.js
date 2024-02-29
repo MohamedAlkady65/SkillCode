@@ -2,54 +2,33 @@ const router = require("express").Router();
 const AuthController = require("../controllers/AuthController.js");
 const TeachersController = require("../controllers/TeachersController.js");
 
+router.use(AuthController.protectRoute);
+
 router
 	.route("/")
-	.get(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2, 3),
-		TeachersController.getTeacher
-	)
-	.post(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		TeachersController.uploadPhoto,
-		TeachersController.addTeacher
-	);
+	.all(AuthController.restrictTo(1, 2))
+	.get(TeachersController.getAll)
+	.post(TeachersController.uploadPhoto, TeachersController.add);
 
 router.get(
-	"/list/schooId",
-	AuthController.protectRoute,
+	"/list/:schooId",
 	AuthController.restrictTo(1, 2),
-	TeachersController.getListOfTeachers
+	TeachersController.getListBySchoolId
 );
+
+router
+	.route("/me")
+	.all(AuthController.restrictTo(3))
+	.get(TeachersController.getMe)
+	.patch(TeachersController.editMe);
 
 router
 	.route("/:id")
-	.get(
-		AuthController.protectRoute,
+	.all(
 		AuthController.restrictTo(1, 2),
-		TeachersController.checkTeacherInSchool,
-		TeachersController.getTeacherById
-	);
-// .delete(
-// 	AuthController.protectRoute,
-// 	AuthController.restrictTo(1, 2),
-// 	TeachersController.checkTeacherInSchool,
-// 	TeachersController.deleteTeacherById
-// );
+		TeachersController.checkTeacherInSchool
+	)
+	.get(TeachersController.getById)
+	.patch(TeachersController.uploadPhoto, TeachersController.editById);
 
-router.patch(
-	"/:id?",
-	AuthController.protectRoute,
-	AuthController.restrictTo(1, 2, 3),
-	TeachersController.checkTeacherInSchool,
-	TeachersController.uploadPhoto,
-	TeachersController.editTeacherById
-);
-router.get(
-	"/list/:schooId",
-	AuthController.protectRoute,
-	AuthController.restrictTo(1, 2),
-	TeachersController.getListOfTeachers
-);
 module.exports = router;

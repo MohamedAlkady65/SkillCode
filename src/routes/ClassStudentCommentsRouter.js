@@ -4,23 +4,16 @@ const ClassStudentCommentsController = require("../controllers/ClassStudentComme
 const router = require("express").Router({ mergeParams: true });
 
 router
-	.route("/classes/:classId/students/:studentId")
-	.get(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2, 3),
-		ClassStudentCommentsController.get
-	)
-	.post(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2, 3),
-		ClassStudentCommentsController.add
-	);
+	.route("/")
+	.get(ClassStudentCommentsController.get)
+	.post(ClassStudentCommentsController.add);
 
 router
 	.route("/:id")
 	.delete(
 		AuthController.protectRoute,
 		AuthController.restrictTo(1, 2, 3),
+		ClassStudentCommentsController.authorizeComment,
 		ClassStudentCommentsController.delete
 	);
 

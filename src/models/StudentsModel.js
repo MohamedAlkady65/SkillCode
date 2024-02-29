@@ -1,4 +1,4 @@
-const db = require("../db.js");
+const db = require("../config/db.js");
 
 const age = `FLOOR(DATEDIFF(CURDATE(), birth_day) /365.25) AS age`;
 

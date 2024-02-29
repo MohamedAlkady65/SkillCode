@@ -1,4 +1,4 @@
-const db = require("../db.js");
+const db = require("../config/db.js");
 
 class ReportsModel {
 	static async add({ transactionConnection, report }) {

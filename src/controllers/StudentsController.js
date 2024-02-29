@@ -4,14 +4,12 @@ const studentValidation = require("../validations/studentValidation.js");
 const AppError = require("../utils/appError.js");
 const uploadMulter = require("../utils/uploadMulter.js");
 
-const upload = uploadMulter({
+exports.uploadPhoto = uploadMulter({
 	typeError: new AppError("Photo must be an image", 400),
-});
-
-exports.uploadPhoto = upload.single("photo");
+}).single("photo");
 
 exports.addStudent = catchAsync(async (req, res, next) => {
-	if (!req.user.isAdmin) {
+	if (req.user.isSchool) {
 		req.body.school = req.user.school_id;
 	}
 
@@ -25,17 +23,11 @@ exports.addStudent = catchAsync(async (req, res, next) => {
 	});
 });
 
-exports.checkStudentInSchool = catchAsync(async (req, res, next) => {
+exports.getAllStudents = catchAsync(async (req, res, next) => {
 	if (req.user.isSchool) {
-		await StudentsServices.checkStudentInSchool({
-			studentId: req.params.id,
-			schoolId: req.user.school_id,
-		});
+		req.query.school = req.user.school_id;
 	}
-	next();
-});
 
-const getAllStudents = async (req, res, next) => {
 	const result = await StudentsServices.getAllStudents(req.query);
 
 	res.status(200).json({
@@ -44,31 +36,8 @@ const getAllStudents = async (req, res, next) => {
 		results: result.students.length,
 		data: result.students,
 	});
-};
-
-exports.getStudent = catchAsync(async (req, res, next) => {
-	switch (req.user.role) {
-		case 1:
-			await getAllStudents(req, res, next);
-			break;
-		case 2:
-			req.query.school = req.user.school_id;
-			await getAllStudents(req, res, next);
-			break;
-		default:
-			break;
-	}
 });
 
-exports.getStudentByNationalId = catchAsync(async (req, res, next) => {
-	const id = req.params.national_id;
-	const student = await StudentsServices.getStudentByNationalId(id);
-
-	res.status(200).json({
-		status: "success",
-		data: student,
-	});
-});
 exports.getStudentById = catchAsync(async (req, res, next) => {
 	const id = req.params.id;
 	const student = await StudentsServices.getStudentById(id);
@@ -103,4 +72,24 @@ exports.editStudentById = catchAsync(async (req, res, next) => {
 		status: "success",
 		message: "Student Edited Successfully",
 	});
+});
+
+exports.getStudentByNationalId = catchAsync(async (req, res, next) => {
+	const id = req.params.national_id;
+	const student = await StudentsServices.getStudentByNationalId(id);
+
+	res.status(200).json({
+		status: "success",
+		data: student,
+	});
+});
+
+exports.checkStudentInSchool = catchAsync(async (req, res, next) => {
+	if (req.user.isSchool) {
+		await StudentsServices.checkStudentInSchool({
+			studentId: req.params.id,
+			schoolId: req.user.school_id,
+		});
+	}
+	next();
 });

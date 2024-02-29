@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 const ReportsModel = require("../models/ReportsModel");
 const AppError = require("../utils/appError");
 

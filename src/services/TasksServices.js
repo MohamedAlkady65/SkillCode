@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 const TasksModel = require("../models/TasksModel");
 const AppError = require("../utils/appError");
 const sharpHandler = require("../utils/sharpHandler");

@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 
 class TasksModel {
 	static async add(transactionConnection, task) {

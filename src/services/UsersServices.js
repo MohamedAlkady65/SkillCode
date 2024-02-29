@@ -2,7 +2,6 @@ const UsersModel = require("../models/UsersModel");
 const { hashPassword, compareHashedPassword } = require("../utils/encrypt.js");
 const TokensServices = require("./TokensServices.js");
 const AppError = require("../utils/appError.js");
-const caltTime = require("../utils/caltTime.js");
 
 class UsersServices {
 	constructor() {}

@@ -1,61 +1,27 @@
 const AuthController = require("../controllers/AuthController");
 const ClassesController = require("../controllers/ClassesController");
+const ClassesStudentsRouter = require("../routes/ClassesStudentsRouter");
 
 const router = require("express").Router();
 
+router.use(AuthController.protectRoute);
+
 router
 	.route("/")
-	.post(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.add
-	)
-	.get(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.getAll
-	);
+	.post(AuthController.restrictTo(1, 2), ClassesController.add)
+	.get(AuthController.restrictTo(1, 2, 3), ClassesController.getAll);
+
+router.use(
+	AuthController.restrictTo(1, 2, 3),
+	ClassesController.authorizeClass
+);
 
 router
 	.route("/:id")
-	.get(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.getById
-	)
-	.patch(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.editById
-	)
-	.delete(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.deleteById
-	);
+	.get(ClassesController.getById)
+	.patch(ClassesController.editById)
+	.delete(ClassesController.deleteById);
 
-router
-	.route("/:id/students")
-	.get(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.getEnrolledStudents
-	)
-	.post(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.enrollStudents
-	)
-	.delete(
-		AuthController.protectRoute,
-		AuthController.restrictTo(1, 2),
-		ClassesController.checkClassInSchool,
-		ClassesController.removeEnrolledStudents
-	);
+router.use("/:classId/students", ClassesStudentsRouter);
 
 module.exports = router;

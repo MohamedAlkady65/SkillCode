@@ -1,5 +1,5 @@
 const SchoolsModel = require("../models/SchoolsModel.js");
-const db = require("../db.js");
+const db = require("../config/db.js");
 const ApiFeatures = require("../utils/ApiFeatures.js");
 const AppError = require("../utils/appError.js");
 const UsersServices = require("./UsersServices.js");

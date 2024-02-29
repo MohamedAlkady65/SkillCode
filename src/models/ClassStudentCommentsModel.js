@@ -1,4 +1,4 @@
-const db = require("../db");
+const db = require("../config/db.js");
 class ClassStudentCommentsModel {
 	static async get({ classId, studentId }) {
 		const sql = `SELECT id, comment, date_time FROM class_student_comments 
@@ -30,6 +30,14 @@ class ClassStudentCommentsModel {
 		const values = { classId, studentId };
 		const [result] = await db.query(sql, values);
 		return result;
+	}
+
+	static async getSchoolAndTeacher(commentId) {
+		const sql = `SELECT c.school_id, c.teacher_id FROM class_student_comments cs 
+		INNER JOIN classes c on cs.class_id = c.id WHERE cs.id = ?`;
+		const values = [commentId];
+		const [comments] = await db.query(sql, values);
+		return comments;
 	}
 }
 

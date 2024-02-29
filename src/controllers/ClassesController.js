@@ -16,6 +16,8 @@ exports.add = catchAsync(async (req, res, next) => {
 exports.getAll = catchAsync(async (req, res, next) => {
 	if (req.user.isSchool) {
 		req.query.school_id = req.user.school_id;
+	} else if (req.user.isTeacher) {
+		req.query.teacher_id = req.user.teacher_id;
 	}
 
 	const result = await ClassesServices.getAll(req.query);
@@ -70,51 +72,17 @@ exports.deleteById = catchAsync(async (req, res, next) => {
 		data: null,
 	});
 });
-exports.enrollStudents = catchAsync(async (req, res, next) => {
-	req.body.class_id = req.params.id;
 
-	const data = await classValidation.validateEnrollStudents(req.body);
-
-	await ClassesServices.enrollStudents(data.class_id, data.students);
-
-	res.status(200).json({
-		status: "success",
-		message: "Students Enrolled Successfully",
-	});
-});
-exports.removeEnrolledStudents = catchAsync(async (req, res, next) => {
-	req.body.class_id = req.params.id;
-
-	const data = await classValidation.validateEnrollStudents(req.body);
-
-	await ClassesServices.removeEnrolledStudents(data.class_id, data.students);
-
-	res.status(204).json({
-		status: "success",
-		data: null,
-	});
-});
-
-exports.getEnrolledStudents = catchAsync(async (req, res, next) => {
-	const classId = req.params.id;
-	const result = await ClassesServices.getEnrolledStudents(
-		classId,
-		req.query
-	);
-
-	res.status(200).json({
-		status: "success",
-		pagesCount: result.pagesCount,
-		results: result.students.length,
-		data: result.students,
-	});
-});
-
-exports.checkClassInSchool = catchAsync(async (req, res, next) => {
+exports.authorizeClass = catchAsync(async (req, res, next) => {
 	if (req.user.isSchool) {
-		await ClassesServices.checkClassInSchool({
+		await ClassesServices.authorizeClass({
 			classId: req.params.id,
 			schoolId: req.user.school_id,
+		});
+	} else if (req.user.isTeacher) {
+		await ClassesServices.authorizeClass({
+			classId: req.params.id,
+			teacherId: req.user.teacher_id,
 		});
 	}
 	next();

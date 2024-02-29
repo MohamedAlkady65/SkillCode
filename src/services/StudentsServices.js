@@ -2,7 +2,7 @@ const StudentsModel = require("../models/StudentsModel");
 const ApiFeatures = require("../utils/ApiFeatures");
 const AppError = require("../utils/appError");
 const sharpHandler = require("../utils/sharpHandler.js");
-const db = require("../db.js");
+const db = require("../config/db.js");
 
 class StudentsServices {
 	constructor() {}
